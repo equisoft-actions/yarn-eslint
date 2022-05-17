@@ -3,7 +3,7 @@ description: |
   Run a yarn task expecting eslint reports to be produced. The exported reports will follow naming conventions
   detailed by our ADRs (https://confluence.equisoft.com/display/HRMI/ADR).
 
-  A report named `build/eslint/junit.xml` is expected under all circumstances.
+  A report named `build/eslint/report.sarif` is expected under all circumstances.
 
   Errors will be annotated on pull requests.
 
@@ -18,7 +18,7 @@ inputs:
   report-name:
     description: The name of the archived report. It must follow the convention detailed by our ADRs.
     required: true
-    default: eslint.junit.xml
+    default: eslint.sarif
   report-retention-days:
     description: Duration in days to preserve reports. Defaults to 5.
     required: true
@@ -53,11 +53,12 @@ runs:
         name: ${{ inputs.report-name }}
         retention-days: ${{ inputs.report-retention-days }}
         if-no-files-found: error
-        path: ${{ steps.context.outputs.working-directory }}/build/eslint/junit.xml
+        path: ${{ steps.context.outputs.working-directory }}/build/eslint/report.sarif
 
     - name: Create annotations
-      if: "!cancelled() && inputs.enable-annotations == 'true' && github.actor != 'dependabot[bot]'"
-      uses: ataylorme/eslint-annotate-action@1.2.0
+      if: "!cancelled() && inputs.enable-annotations == 'true'"
+      uses: equisoft-actions/sarif-annotator@v1
       with:
-        repo-token: ${{ github.token }}
-        report-json: ${{ steps.context.outputs.working-directory }}/build/eslint/report.json
+        level: warning
+        sarif-path: ${{ steps.context.outputs.working-directory }}/build/eslint/report.sarif
+        title: ESLint results
