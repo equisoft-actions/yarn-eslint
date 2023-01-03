@@ -39,7 +39,7 @@ runs:
       shell: bash
       id: context
       run: |
-        echo "::set-output name=working-directory::$(realpath ${{ inputs.working-directory }})"
+        echo "working-directory=$(realpath ${{ inputs.working-directory }})" >> $GITHUB_OUTPUT
 
     - name: Run ESLint
       shell: bash
